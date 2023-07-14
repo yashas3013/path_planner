@@ -21,9 +21,11 @@ private:
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr occ_sub;
   std::shared_ptr<grid_map::GridMap> map_ptr;
   const int min_val = -1.0;
-  const int max_val = 1.0;
+  const int max_val = 100.0;
   cv::Mat image;
-  cv::Mat imgGray, Blur_img;
+  cv::Mat imgGray, Blur_img, aggregate;
+  int val;
+  // grid_map::Matrix &res;
 
 public:
   planner() : Node("path_planner") {
@@ -33,6 +35,21 @@ public:
     // this->map_ptr->setGeometry(grid_map::Length(8, 8), 0.025);
     // this->map_ptr->setPosition(grid_map::Position(4, 0));
     this->map_ptr->add("map", 0.0);
+    this->map_ptr->add("aggregate", 0.0);
+  }
+
+public:
+  void mat_add(grid_map::Matrix &m1, grid_map::Matrix &m2,
+               grid_map::Matrix &m3) {
+    for (int r = 0; r < m1.rows(); r++) {
+      for (int c = 0; c < m1.cols(); c++) {
+        val = m1(r, c) + m2(r, c);
+        if (val > 100) {
+          val = 100;
+        }
+        m3(r, c) = val;
+      }
+    }
   }
 
 public:
@@ -57,14 +74,28 @@ public:
     grid_map::GridMapCvConverter::toImage<unsigned char, 4>(
         *this->map_ptr, "map", CV_8UC4, min_val, max_val, image);
     cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
-    cv::GaussianBlur(image, Blur_img, cv::Size(5, 5), 10, 0);
+    cv::GaussianBlur(image, Blur_img, cv::Size(5, 5), 0, 0);
+    // cv::addWeighted(image, 1, Blur_img, 1, 0.0, aggregate);
     cv::imshow("Blured", Blur_img);
-    cv::imshow("Gray", imgGray);
+    // cv::imshow("Gray", imgGray);
     cv::imshow("image", image);
-    cv::waitKey(0);
+    // cv::waitKey(0);
     grid_map::GridMapCvConverter::addLayerFromImage<unsigned char, 4>(
-        Blur_img, "inflation", *this->map_ptr, minValue, maxValue);
-    // std::cout << this->map_ptr->get("map") << std::endl;
+        Blur_img, "inflation", *this->map_ptr, min_val, max_val);
+    // grid_map::GridMapCvConverter::toImage<unsigned char, 4>(
+    // *this->map_ptr, "inflation", CV_8UC4, 0, 10, image);
+    // cv::imshow("image", image);
+    // cv::waitKey(0);
+    std::cout << this->map_ptr->get("inflation") << std::endl;
+    std::cout << "-----------------------------------------" << std::endl;
+    std::cout << this->map_ptr->get("map") << std::endl;
+    mat_add(this->map_ptr->get("map"), this->map_ptr->get("inflation"),
+            this->map_ptr->get("aggregate"));
+    std::cout << this->map_ptr->get("aggregate") << std::endl;
+    grid_map::GridMapCvConverter::toImage<unsigned char, 4>(
+        *this->map_ptr, "aggregate", CV_8UC4, min_val, max_val, image);
+    cv::imshow("aggregate", image);
+    cv::waitKey(0);
   }
 };
 
