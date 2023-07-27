@@ -15,6 +15,11 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "path_planning/a_star.hpp"
+
+#include "../include/path_planning/lib/utils/src/utils.cpp"
+#include "../include/path_planning/src/a_star.cpp"
+#include "utils/utils.hpp"
 using std::placeholders::_1;
 class planner : public rclcpp::Node {
 private:
@@ -86,7 +91,7 @@ public:
     // *this->map_ptr, "inflation", CV_8UC4, 0, 10, image);
     // cv::imshow("image", image);
     // cv::waitKey(0);
-    std::cout << this->map_ptr->get("inflation") << std::endl;
+    // std::cout << this->map_ptr->get("inflation") << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
     // std::cout << this->map_ptr->get("map") << std::endl;
     mat_add(this->map_ptr->get("map"), this->map_ptr->get("inflation"),
