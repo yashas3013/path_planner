@@ -88,13 +88,13 @@ public:
     // cv::waitKey(0);
     std::cout << this->map_ptr->get("inflation") << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
-    std::cout << this->map_ptr->get("map") << std::endl;
+    // std::cout << this->map_ptr->get("map") << std::endl;
     mat_add(this->map_ptr->get("map"), this->map_ptr->get("inflation"),
             this->map_ptr->get("aggregate"));
     std::cout << this->map_ptr->get("aggregate") << std::endl;
-    grid_map::GridMapCvConverter::toImage<unsigned char, 4>(
-        *this->map_ptr, "aggregate", CV_8UC4, min_val, max_val, image);
-    cv::imshow("aggregate", image);
+    // grid_map::GridMapCvConverter::toImage<unsigned char, 4>(
+    // *this->map_ptr, "aggregate", CV_8UC4, min_val, max_val, image);
+    // cv::imshow("aggregate", image);
     cv::waitKey(0);
   }
 };
